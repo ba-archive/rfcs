@@ -6,4 +6,4 @@
 
 当前需要讨论的主题为：
 
-- 剧情播放器架构
+- [剧情播放器架构](https://github.com/ba-archive/rfcs/blob/main/0000-story-viewer-architecture.md)
