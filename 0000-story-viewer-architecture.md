@@ -23,7 +23,7 @@
 
 ### 字幕
 
-使用 Vue 组件实现。
+使用 Vue 组件实现。播放器应该传入`text`,`type`,`textEffect`三个prop.
 
 ### canvas
 
@@ -131,6 +131,101 @@
       "Highlight": False
     }
   ],
+  "CharacterEffect": [
+    {
+      "Target": 1,
+      "Effect": "cheer",
+      "Async": true
+    },
+    {
+      "Target": 1,
+      "Effect": "timeout",
+      "Async": false
+    }
+    {
+      "Target": 1,
+      "Effect": "hophop",
+      "Async": true
+    },
+    {
+      "Target": 1,
+      "Effect": "ar",
+      "Async": true
+    },
+    {
+      "Target": 3,
+      "Effect": "m5",
+      "Async": true
+    }
+  ],
+  "Option": [
+    {
+      "SelectionGroup": 1,
+      "Text": {
+        "TextJp": "選択肢1",
+        "TextCn": "选项1",
+        "TextTw": "選項1",
+        "TextEn": "Option 1"
+      }
+    },
+    {
+      "SelectionGroup": 2,
+      "Text": {
+        "TextJp": "選択肢2",
+        "TextCn": "选项2",
+        "TextTw": "選項2",
+        "TextEn": "Option 2"
+      }
+    }
+  ],
+  "TextEffect": [
+    {
+      "Name": "st",
+      "Value": [
+        316,
+        566
+      ],
+      "Async": false
+    },
+    {
+      "Name": "fontsize",
+      "Value": 140
+    },
+    {
+      "Name": "smooth",
+      "Value": Null
+    }
+  ],
+  "Text": {
+    "TextJp": "君日本語本当上手",
+    "TextCn": "中文翻译",
+    "TextTw": "国际服翻译",
+    "TextEN": "English text"
+  },
+  "VoiceJp": "Main_11000_054"
+}
+```
+修改后定义:
+```typescript
+type StoryType="title" | "place" | "text" | "option" | "st" | "effectOnly"
+
+interface StoryUnit{
+  Type: StoryType
+  GroupId: number,
+  SelectionGroup: number,
+  BGMId: number,
+  Sound: string,
+  transition: number,
+  BGName: number,
+  BGEffect: string[]
+  PopupFileName: string,
+  Characters: 
+    {
+      "Position": 2,
+      CharacterID": 10000,
+      "Face": 3,
+      "Highlight": True
+    }[],
   "CharacterEffect": [
     {
       "Target": 1,
@@ -410,7 +505,7 @@ interface Player {
 
 `next(args: NextArg): Promise<NextResult>;`
 
-##### 3. claer
+##### 3. clear
 
 清屏
 
@@ -509,8 +604,42 @@ interface EffectConfig {
     args: ...
 }
 ```
-
-#### 2. 其他接口?
+#### 2. 人物层
+人物层负责处理人物的显示, 提供以下接口:
+##### showCharacter(config: CharacterConfig)
+```typescript
+interface CharacterConfig{
+    appInstance: PIXI.Application
+    characters: {
+      position: number,
+      characterName: string,
+      face: number,
+      highlight: boolean
+    }[]
+}
+```
+##### getCharacterInstance(characterName:string)
+获取角色pixi-spine实例
+#### 3. 背景层
+背景层负责背景或live2d的显示, 接口如下:
+##### showBG(config:BGConfig)
+```typescript
+interface BGConfig{
+    appInstance: PIXI.Application
+    BGName: string
+}
+```
+#### 4.声音层
+声音层负责背景音乐, 效果音, 语音等的播放, 接口如下:
+##### playAudio(config:AudioConfig)
+```typescript
+interface AudioConfig{
+    BGName?:string
+    sound?:string
+    voiceJp?:string
+} 
+```
+#### 5. 其他接口?
 
 ##### 立即完成播放
 
