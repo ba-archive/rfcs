@@ -23,7 +23,7 @@
 
 ### 字幕
 
-使用 Vue 组件实现。播放器应该传入`text`,`type`,`textEffect`三个prop.
+使用 Vue 组件实现。
 
 ### canvas
 
@@ -205,132 +205,82 @@
   "VoiceJp": "Main_11000_054"
 }
 ```
-修改后定义:
+#### 修改后定义:
 ```typescript
-type StoryType="title" | "place" | "text" | "option" | "st" | "effectOnly"
+type StoryType="title" | "place" | "text" | "option" | "st" | "effectOnly"|'continue'
 
-interface StoryUnit{
-  Type: StoryType
-  GroupId: number,
-  SelectionGroup: number,
-  BGMId: number,
-  Sound: string,
-  transition: number,
-  BGName: number,
-  BGEffect: string[]
-  PopupFileName: string,
-  Characters: 
-    {
-      "Position": 2,
-      CharacterID": 10000,
-      "Face": 3,
-      "Highlight": True
-    }[],
-  "CharacterEffect": [
-    {
-      "Target": 1,
-      "Effect": "cheer",
-      "Async": true
-    },
-    {
-      "Target": 1,
-      "Effect": "timeout",
-      "Async": false
-    }
-    {
-      "Target": 1,
-      "Effect": "hophop",
-      "Async": true
-    },
-    {
-      "Target": 1,
-      "Effect": "ar",
-      "Async": true
-    },
-    {
-      "Target": 3,
-      "Effect": "m5",
-      "Async": true
-    }
-  ],
-  "Option": [
-    {
-      "SelectionGroup": 1,
-      "Text": {
-        "TextJp": "選択肢1",
-        "TextCn": "选项1",
-        "TextTw": "選項1",
-        "TextEn": "Option 1"
-      }
-    },
-    {
-      "SelectionGroup": 2,
-      "Text": {
-        "TextJp": "選択肢2",
-        "TextCn": "选项2",
-        "TextTw": "選項2",
-        "TextEn": "Option 2"
-      }
-    }
-  ],
-  "TextEffect": [
-    {
-      "Name": "st",
-      "Value": [
-        316,
-        566
-      ],
-      "Async": false
-    },
-    {
-      "Name": "fontsize",
-      "Value": 140
-    },
-    {
-      "Name": "smooth",
-      "Value": Null
-    }
-  ],
-  "Text": {
-    "TextJp": "君日本語本当上手",
-    "TextCn": "中文翻译",
-    "TextTw": "国际服翻译",
-    "TextEN": "English text"
-  },
-  "VoiceJp": "Main_11000_054"
-}
-```
-建议:
-Type 
-live2d改为st, 并新增加可选的stArgs字段作为st的参数. text类型单纯指向在对话框的文字. 并新增加effectOnly类型对于无文字仅有特效的情况
-新增continue类型对应提示下一章节, 并添加有可选的nextChapter字段提示下一章节名
-
-text应该是一个有着如下类型的数组:
-```typescript
 interface Text{
     content: string
     waitTime?: number
 }
-```
-textEffect应该给定一个index指定对数组里的哪段文字起作用.
-
-新增menuState: boolean控制菜单显示
-
-新增可选的fight?: fightId字段表示接下来是否是战斗(主线的战斗也是剧情的一部分)
-
-新增可选的clear?: "st"|"all"控制隐藏全部和隐藏放置的文字(对应`#all；hide`, `#clearSt`)
-
-新增otherAction控制剩余其他的特效或操作, 它的格式如下:
-```typescript
-interface Action{
+    
+interface Character{
+      position: number,
+      CharacterName: number,
+      face: number,
+      highlight: boolean
+}
+    
+interface CharacterEffect{
+      target: number,
+      effect: string,
+      async: boolean
+}
+    
+interface Option{
+      SelectionGroup: number,
+      text: {
+        TextJp: string,
+        TextCn: string,
+        TextTw: string,
+        TextEn: string
+      }
+}
+    
+interface TextEffect{
+      name: string,
+      value: string[],
+      textIndex: number
+}
+    
+interface Effect{
     type: string
     args: Arrary<string>
 }
-```
 
+interface StoryUnit{
+  GroupId: number,
+  SelectionGroup: number,
+  BGMId: number,
+  Sound: string,
+  Transition: number,
+  BGName: number,
+  BGEffect: string[]
+  PopupFileName: string,
+  type: StoryType,
+  menuState: boolean,
+  characters: Character[],
+  characterEffect: CharacterEffect[],
+  options: Option[],
+  textEffect: TextEffect[],
+  text: {
+    TextJp: Text[],
+    TextCn: Text[],
+    TextTw: Text[],
+    TextEN: Text[]
+  },
+  VoiceJp: string,
+  stArgs?: string[],
+  nextChapterName?:string,
+  fight?: number,
+  clear?: "st"|"all",
+  otherEffect?: Effect[]
+}
+```
+注意到命名大小驼峰都有使用, 这是为了区分原始数据属性(大驼峰)和自定义数据属性(小驼峰).
 #### 参数定义
 
-#### `Type`: `Array`
+##### `Type`: `Array`
 
 定义该条数据的类型。Array 内的元素一般为 `title`, `place`, `text`, `option`, `live2d` 中的一个。如果在 L2D
 场景中需要做出选择，可以同时使用 `live2d` 和 `option`。（需不需要做到这一步？棒子没有严格区分普通剧情和 L2D）
@@ -359,39 +309,39 @@ interface Action{
 该条消息为 Live2D 场景。
 </details>
 
-#### `GroupId`: `Number`
+##### `GroupId`: `Number`
 
 消息组的 ID。在同一个剧情中，这个 ID 总是相同。
 
-#### `SelectionGroup`: `Number`
+##### `SelectionGroup`: `Number`
 
 选择肢的 ID。在 `options` 当中选择了某个选项之后，应该跳转到对应的选择肢 ID 的内容。
 
-#### `BGMId`: `Number`
+##### `BGMId`: `Number`
 
 背景音乐的 ID。剧情播放器根据这个 ID 播放对应的背景音乐。（游戏中 BGM 的命名格式均为 `Theme_000`）
 
-#### `Sound`: `String`
+##### `Sound`: `String`
 
 需要播放的音效。播放器根据这个字符串找到对应的音效文件。
 
-#### `Transition`: `Number`
+##### `Transition`: `Number`
 
 场景切换效果的 ID 。在请求资源的时候，同时请求 `ScenarioTransitionExcelTable.json` 文件，根据这个 ID 找到对应的场景切换效果。
 
-#### `BGName`: `Number`
+##### `BGName`: `Number`
 
 背景图片的 ID。在请求资源的时候，同时请求 `ScenarioBGExcelTable.json` 文件，根据这个 ID 找到对应的背景图片。
 
-#### `BGEffect`: `Array`
+##### `BGEffect`: `Array`
 
 背景图片的特效。这个由特效函数实现。
 
-#### `PopupFileName`: `String`
+##### `PopupFileName`: `String`
 
 有的时候会跳出一些小图片，PopupFileName 就是这些图片的文件名。
 
-#### `Character`: `Array`
+##### `Character`: `Array`
 
 剧情中出现的人物。
 
@@ -411,7 +361,7 @@ interface Action{
 
 人物是否高亮。`True` 时不做处理，`False` 时加上一层透明度为 0.5 的黑色遮罩。
 
-#### `CharacterEffect`: `Array`
+##### `CharacterEffect`: `Array`
 
 人物的特效。这个由特效函数实现。
 
@@ -427,7 +377,7 @@ interface Action{
 
 特效是否异步。`True` 时特效会立即播放，`False` 时会顺序播放。
 
-#### `Option`: `Array`
+##### `Option`: `Array`
 
 选择肢。
 
@@ -441,7 +391,7 @@ interface Action{
 
 **除了 `TextJp`，其他字段都有可能缺失。前端应该做好 fallback 的准备**
 
-#### `TextEffect`: `Array`
+##### `TextEffect`: `Array`
 
 文本特效。
 
@@ -457,15 +407,40 @@ interface Action{
 
 特效是否异步。`True` 时特效会立即播放，`False` 时会顺序播放。
 
-#### `Text`: `Object`
+##### `Text`: `Object`
 
 剧情文本。有 `TextJp`, `TextCn`, `TextTw`, `TextEn` 四个 key。
 
 **除了 `TextJp`，其他字段都有可能缺失。前端应该做好 fallback 的准备**
 
-#### `VoiceJp`: `String`
+##### `VoiceJp`: `String`
 
 日语语音文件名。目前只有序章有语音。
+
+#### 修改后参数定义(仅说明原来参数定义没有的部分)
+##### Type: StoryType
+`'continue'`: 展示下一章节名
+
+`st`: #st放置文字 
+`effectOnly`: 只有特效没有文字的情况
+##### menuState
+菜单是否显示
+##### characters
+改为使用`CharacterName`作为唯一标识(剧情里不一定出现的是已实装学生)
+##### textEffect
+增加了`textIndex`字段指定对哪段文字起作用
+##### Text
+`content`为具体文字, `waitTime`为该文字播放后需要等待的时间
+##### nextChapterName
+下一章节名, 可选
+##### stArgs
+st的参数, 可选
+##### fight
+是否接下来加入战斗, 值为战斗视频的ID. 可选.
+##### clear
+是否进行清除操作, `st`清除放置文字, `all`清除所有.
+##### otherEffect
+无法分类的特效的预留接口
 
 
 ## 播放器
@@ -488,8 +463,10 @@ interface Player {
     readonly isPlaying: boolean;
 }
 ```
-
+数据交换示意图
+![baPlayer](https://cdn.staticaly.com/gh/ourandream/blog_images@master/20221108/baPlayer.4f39upc84g00.webp)
 ### 1. 本体
+本体仅用于更改当前剧情信息.需要支持自动更改剧情信息.
 
 #### 接口
 
@@ -536,6 +513,7 @@ alias for next ?
 如果特效没有播放完成，那么在点击时没有反应，不会快进到下一个事件。（L2D 也没有快进选项）
 
 ### 2. 特效层
+特效层用于播放除人物相关特效外的特效
 
 #### 1. 提供标准的调用接口用于播放特效
 ```typescript
@@ -604,42 +582,28 @@ interface EffectConfig {
     args: ...
 }
 ```
-#### 2. 人物层
-人物层负责处理人物的显示, 提供以下接口:
-##### showCharacter(config: CharacterConfig)
-```typescript
-interface CharacterConfig{
-    appInstance: PIXI.Application
-    characters: {
-      position: number,
-      characterName: string,
-      face: number,
-      highlight: boolean
-    }[]
-}
-```
-##### getCharacterInstance(characterName:string)
-获取角色pixi-spine实例
-#### 3. 背景层
-背景层负责背景或live2d的显示, 接口如下:
-##### showBG(config:BGConfig)
-```typescript
-interface BGConfig{
-    appInstance: PIXI.Application
-    BGName: string
-}
-```
-#### 4.声音层
+### 3. 人物层
+人物层负责处理人物的显示, 人物特效, 人物动作.
+
+### 4. 背景层
+背景层负责背景或live2d的显示. 它在改变的同时会更新背景实例信息.
+### 5.声音层
 声音层负责背景音乐, 效果音, 语音等的播放, 接口如下:
 ##### playAudio(config:AudioConfig)
 ```typescript
 interface AudioConfig{
-    BGName?:string
-    sound?:string
-    voiceJp?:string
+    name: string
+    loop: boolean
 } 
 ```
-#### 5. 其他接口?
+### 6 UI层
+UI层负责UI的相关功能
+### 7 文字层
+文字层负责有对话框文字, 无对话框文字, 选项的显示.
+
+文字层同时需要更新历史剧情信息与选项选择信息.
+
+### 8. 其他接口?
 
 ##### 立即完成播放
 
