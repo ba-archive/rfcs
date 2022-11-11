@@ -1,4 +1,9 @@
-## 剧情播放器架构
+# 剧情播放器架构
+
+## 技术栈
+
+- 状态管理：Pinia + Vue
+- Spine 渲染：pixi v6, pixi-spine
 
 ## DOM 结构
 
@@ -44,7 +49,7 @@
 <details>
 <summary>点击展开</summary>
 
-```json
+```json=
 [
   {
     "GroupId": 1000502,
@@ -101,6 +106,9 @@
 ### 2. 翻译层转译原始数据为剧情播放器标准格式<a id="player-config-form"></a>
 
 剧情播放器能够接受的单条标准参数如下。
+
+<details>
+<summary>初稿</summary>
 
 ```json
 {
@@ -205,9 +213,14 @@
   "VoiceJp": "Main_11000_054"
 }
 ```
+</details>
+
 #### 修改后定义:
-```typescript
-type StoryType="title" | "place" | "text" | "option" | "st" | "effectOnly"|'continue'
+
+**注意：命名大小驼峰都有使用, 这是为了区分原始数据属性(大驼峰)和自定义数据属性(小驼峰)。**
+
+```typescript=
+type StoryType = "title" | "place" | "text" | "option" | "st" | "effectOnly" | "continue"
 
 interface Text{
     content: string
@@ -277,7 +290,7 @@ interface StoryUnit{
   otherEffect?: Effect[]
 }
 ```
-注意到命名大小驼峰都有使用, 这是为了区分原始数据属性(大驼峰)和自定义数据属性(小驼峰).
+
 #### 参数定义
 
 ##### `Type`: `Array`
@@ -465,8 +478,12 @@ interface Player {
 ```
 数据交换示意图
 ![baPlayer](https://cdn.staticaly.com/gh/ourandream/blog_images@master/20221108/baPlayer.4f39upc84g00.webp)
+
+
 ### 1. 本体
 本体仅用于更改当前剧情信息.需要支持自动更改剧情信息.
+
+同时, 本体还负责处理各层发出的各种事件.
 
 #### 接口
 
@@ -514,6 +531,9 @@ alias for next ?
 
 ### 2. 特效层
 特效层用于播放除人物相关特效外的特效
+<details>
+<summary>已过时</summary>
+
 
 #### 1. 提供标准的调用接口用于播放特效
 ```typescript
@@ -561,8 +581,9 @@ type: `Sprite`
 背景Sprite实例, 可选
 ##### args
 特效可能带有的参数, 数组形式以便传入多个参数. 可选.
-
-#### 2. 事件
+</details>
+    
+#### 事件
 
 `effectDone`: 特效播放完成时发出的事件
 
@@ -584,6 +605,9 @@ interface EffectConfig {
 ```
 ### 3. 人物层
 人物层负责处理人物的显示, 人物特效, 人物动作.
+    
+#### 事件
+`characterDone`: 人物各种处理已完成
 
 ### 4. 背景层
 背景层负责背景或live2d的显示. 它在改变的同时会更新背景实例信息.
@@ -598,10 +622,16 @@ interface AudioConfig{
 ```
 ### 6 UI层
 UI层负责UI的相关功能
+#### 事件
+`skip`: 跳过剧情
 ### 7 文字层
 文字层负责有对话框文字, 无对话框文字, 选项的显示.
 
 文字层同时需要更新历史剧情信息与选项选择信息.
+#### 事件
+`next`: 进入下一语句
+    
+`select`: 选择后加入下一剧情语句
 
 ### 8. 其他接口?
 
