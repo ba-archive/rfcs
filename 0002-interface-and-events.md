@@ -60,9 +60,23 @@ interface CharacterEffect{
 参数:
 ```ts
 interface PlayAudio{
-    bgmUrl?:string
+    bgm?:{
+     url?:string
+     bgmArgs:BGMExcelTableItem
+    }
     soundUrl?:string
     voiceJPUrl?:string
+}
+
+interface BGMExcelTableItem {
+  "Id": number,
+  "ProductionStep": string,
+  "Path": string,
+  "Volume": number,
+  "LoopStartTime": number,
+  "LoopEndTime": number,
+  "LoopTranstionTime": number,
+  "LoopOffsetTime": number
 }
 ```
 `playEmotionAudio`: 播放人物情绪动作特效音, 参数是一个string代表人物的情绪动作
