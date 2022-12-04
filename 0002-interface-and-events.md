@@ -55,7 +55,7 @@ interface CharacterEffect{
 # 声音层
 声音层负责背景音乐, 效果音, 语音等的播放
 ## 接受事件
-`playAudio`: 播放bgm, sound, 或voiceJP
+`playAudio`: 播放bgm, sound(特效音), 或voiceJP(人物语音)
 
 参数:
 ```ts
@@ -79,7 +79,9 @@ interface BGMExcelTableItem {
   "LoopOffsetTime": number
 }
 ```
-`playEmotionAudio`: 播放人物情绪动作特效音, 参数是一个string代表人物的情绪动作
+`playEmotionAudio`: 播放人物情绪动作特效音, 参数是一个string代表人物的情绪动作名
+## 可使用getter
+`emotionResources(emotionName:string)`: 获取情绪特效音的url
 
 # UI层
 UI层负责UI的相关功能
